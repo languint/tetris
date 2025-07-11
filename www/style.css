@@ -1,0 +1,93 @@
+:root {
+    --red: #FF6188;
+    --orange: #FC9867;
+    --yellow: #FFD866;
+    --green: #A9DC76;
+    --blue: #78DCE8;
+    --purple: #AB9DF2;
+    --base: #221F22;
+    --darker: #19181A;
+    --elevated-0: #2D2A2E;
+    --elevated-1: #403E41;
+    --text: #FCFCFA;
+}
+
+/* Utility classes */
+.hidden {
+    visibility: hidden;
+}
+
+/* Core */
+
+html,
+body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--darker);
+    font-family: monospace;
+}
+
+.app {
+    width: calc(100% - 4rem);
+    height: calc(100% - 4rem);
+    padding: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*#region Splashscreen */
+
+.splashscreen {
+    min-width: fit-content;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.splashscreen.fade-out {
+    opacity: 0;
+}
+
+.splashscreen-active {
+    color: var(--orange);
+}
+
+.splashscreen-inactive {
+    color: var(--elevated-1);
+}
+
+.splashscreen-text span {
+    display: block;
+    margin: 0;
+    padding: 0;
+    white-space: pre;
+    font-size: x-large;
+}
+
+/*#endregion */
+
+.game-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    border: 1px solid var(--elevated-0);
+    padding: 1rem;
+}
+
+.game-container.fade-in {
+    opacity: 1;
+}
+
+.canvas-container {
+    border: 1px dashed var(--elevated-0);
+}
+
+.game-canvas {
+    background-size: 40px 40px;
+    background-image: linear-gradient(to right, var(--base), transparent 1px), linear-gradient(to bottom, var(--base), transparent 1px);
+    background-repeat: repeat;
+}
