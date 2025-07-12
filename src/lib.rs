@@ -2,13 +2,39 @@ mod utils;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{Element};
 use web_sys::js_sys::Promise;
+use web_sys::Element;
 
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
+}
+
+#[wasm_bindgen]
+pub struct Board {
+    width: u32,
+    height: u32,
+}
+
+#[wasm_bindgen]
+impl Board {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Board {
+        utils::set_panic_hook();
+        Board {
+            width: 10,
+            height: 20,
+        }
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
 }
 
 fn sleep(ms: i32) -> Promise {
@@ -58,9 +84,14 @@ async fn intro_animation() -> Result<(), JsValue> {
     JsFuture::from(sleep(500)).await?;
     splashscreen.class_list().add_1("hidden")?;
 
+    use wasm_bindgen::JsCast;
+    use web_sys::HtmlElement;
+
     let game_container = document
         .query_selector(".game-container")
         .expect("Expected `.game-container` element")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
         .unwrap();
 
     game_container.class_list().add_1("fade-in")?;
