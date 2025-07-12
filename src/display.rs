@@ -94,8 +94,8 @@ impl Display {
         for (r, c) in board.current_piece.iter_blocks() {
             if r >= 0 {
                 self.context.fill_rect(
-                    (c as f64 * self.cell_size as f64),
-                    (r as f64 * self.cell_size as f64),
+                    c as f64 * self.cell_size as f64,
+                    r as f64 * self.cell_size as f64,
                     self.cell_size as f64,
                     self.cell_size as f64,
                 )

@@ -38,7 +38,7 @@ impl Game {
         self.display.draw(&self.board);
 
         self.time_since_last_drop += delta_time;
-        let drop_interval = 500.0; // milliseconds
+        let drop_interval = 500.0;
 
         if self.time_since_last_drop >= drop_interval {
             self.time_since_last_drop -= drop_interval;
@@ -48,8 +48,22 @@ impl Game {
                 self.board.current_piece = next_piece;
             } else {
                 self.board.lock_piece();
-                self.board.current_piece = PieceState::new(PieceType::Straight, 0);
+                let new_piece_type = self.get_next_piece();
+                self.board.current_piece = PieceState::new(new_piece_type, 3); // Start at column 3
             }
+        }
+    }
+
+    fn get_next_piece(&self) -> PieceType {
+        match utils::get_random_int(0, 6) {
+            0 => PieceType::Straight,
+            1 => PieceType::LLeft,
+            2 => PieceType::LRight,
+            3 => PieceType::Square,
+            4 => PieceType::S,
+            5 => PieceType::Z,
+            6 => PieceType::T,
+            _ => unreachable!(),
         }
     }
 

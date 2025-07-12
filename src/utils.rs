@@ -1,4 +1,4 @@
-use web_sys::js_sys::Promise;
+use web_sys::js_sys::{Math, Promise};
 
 pub fn set_panic_hook() {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -18,4 +18,11 @@ pub fn sleep(ms: i32) -> Promise {
             .set_timeout_with_callback_and_timeout_and_arguments_0(&resolve, ms)
             .unwrap();
     })
+}
+
+pub fn get_random_int(min: i32, max: i32) -> i32 {
+    let min_ceiled = Math::ceil(min as f64);
+    let max_floored = Math::floor(max as f64);
+
+    Math::floor(Math::random() * (max_floored - min_ceiled) + min_ceiled) as i32
 }

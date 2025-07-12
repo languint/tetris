@@ -82,7 +82,79 @@ impl Piece {
                     rows: vec![vec![1, 1], vec![1, 0], vec![1, 0]],
                 },
             ],
-            _ => vec![],
+            PieceType::LRight => vec![
+                PieceRotation {
+                    trans_row: 1,
+                    trans_col: -1,
+                    rows: vec![vec![1, 1, 1], vec![1, 0, 0]],
+                },
+                PieceRotation {
+                    trans_row: -1,
+                    trans_col: 0,
+                    rows: vec![vec![1, 1], vec![0, 1], vec![0, 1]],
+                },
+                PieceRotation {
+                    trans_row: 0,
+                    trans_col: 0,
+                    rows: vec![vec![0, 0, 1], vec![1, 1, 1]],
+                },
+                PieceRotation {
+                    trans_row: 0,
+                    trans_col: 1,
+                    rows: vec![vec![1, 0], vec![1, 0], vec![1, 1]],
+                },
+            ],
+            PieceType::Square => vec![PieceRotation {
+                trans_row: 0,
+                trans_col: 0,
+                rows: vec![vec![1, 1], vec![1, 1]],
+            }],
+            PieceType::S => vec![
+                PieceRotation {
+                    trans_row: 1,
+                    trans_col: 0,
+                    rows: vec![vec![0, 1, 1], vec![1, 1, 0]],
+                },
+                PieceRotation {
+                    trans_row: -1,
+                    trans_col: 0,
+                    rows: vec![vec![1, 0], vec![1, 1], vec![0, 1]],
+                },
+            ],
+            PieceType::Z => vec![
+                PieceRotation {
+                    trans_row: 1,
+                    trans_col: 0,
+                    rows: vec![vec![1, 1, 0], vec![0, 1, 1]],
+                },
+                PieceRotation {
+                    trans_row: -1,
+                    trans_col: 0,
+                    rows: vec![vec![0, 1], vec![1, 1], vec![1, 0]],
+                },
+            ],
+            PieceType::T => vec![
+                PieceRotation {
+                    trans_row: 1,
+                    trans_col: -1,
+                    rows: vec![vec![1, 1, 1], vec![0, 1, 0]],
+                },
+                PieceRotation {
+                    trans_row: -1,
+                    trans_col: 0,
+                    rows: vec![vec![0, 1], vec![1, 1], vec![0, 1]],
+                },
+                PieceRotation {
+                    trans_row: 0,
+                    trans_col: 0,
+                    rows: vec![vec![0, 1, 0], vec![1, 1, 1]],
+                },
+                PieceRotation {
+                    trans_row: 0,
+                    trans_col: 1,
+                    rows: vec![vec![1, 0], vec![1, 1], vec![1, 0]],
+                },
+            ],
         })
     }
 }
