@@ -9,6 +9,12 @@ pub struct Board {
     pub height: u32,
 }
 
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[wasm_bindgen]
 impl Board {
     #[wasm_bindgen(constructor)]

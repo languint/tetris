@@ -2,7 +2,7 @@ use std::cmp;
 
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{Element, HtmlCanvasElement, HtmlElement, HtmlHtmlElement};
+use web_sys::{Element, HtmlCanvasElement, HtmlHtmlElement};
 
 use crate::{board::Board, log, utils::sleep};
 
@@ -34,7 +34,7 @@ pub fn resize(board: &Board) -> Result<(), JsValue> {
 
     let html_element: HtmlHtmlElement = document.document_element().unwrap().dyn_into::<HtmlHtmlElement>()?;
 
-    html_element.style().set_property("--cell-size", format!("{cell_size}px").as_str());
+    html_element.style().set_property("--cell-size", format!("{cell_size}px").as_str())?;
 
     Ok(())
 }
