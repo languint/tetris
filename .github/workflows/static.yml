@@ -34,23 +34,38 @@ jobs:
         uses: jetli/wasm-pack-action@v0.4.0
         with:
           version: 'latest'
-          
+
+      # Step 1: Compile Rust to WebAssembly
       - name: Package wasm
         run: wasm-pack build --target web --out-dir pkg
+        # This creates the 'pkg' directory in the root of the repo
 
-      - name: Install wasm
+      # Step 2: Install Node.js dependencies
+      # This step should run `npm install` to get `webpack`, `webpack-cli`, etc.
+      - name: Install npm dependencies
         working-directory: www
-        run: npm i
+        run: npm install
         
+      # Step 3: Run the webpack build
+      # This step executes the "build" script from your package.json,
+      # which bundles all assets, including the WASM files from 'pkg',
+      # into your final output directory (e.g., www/dist).
+      - name: Build frontend with webpack
+        working-directory: www
+        run: npm run build
+
+      # Step 4: Configure GitHub Pages
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      # Step 5: Upload the final build artifact
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # This must point to the directory containing your static files
-          # The path includes the `pkg` output from wasm-pack and any other assets
-          path: 'www/'
+          # This must point to the directory created by your webpack build.
+          # The common default is 'www/dist', but double-check your
+          # webpack.config.js `output.path` to be sure.
+          path: 'www/dist/'
 
       # Step 6: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
