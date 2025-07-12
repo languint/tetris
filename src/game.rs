@@ -47,8 +47,13 @@ impl Game {
     }
 
     pub fn tick(&mut self, delta_time: f64) {
+        let mut ghost_piece = self.board.current_piece.clone();
+        while self.board.is_valid_position(&ghost_piece.move_down()) {
+            ghost_piece.row += 1;
+        }
+
         self.display
-            .draw(&self.board, &self.held_piece, &self.next_piece);
+            .draw(&self.board, &self.held_piece, &self.next_piece, &ghost_piece);
 
         let window = web_sys::window().expect("no global `window` exists");
         let document = window.document().expect("should have a document on window");

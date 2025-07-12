@@ -200,6 +200,12 @@ impl PieceState {
     pub fn rotate(&mut self) {
         self.rotation = (self.rotation + 1) % self.piece.rotations.len() as u8;
     }
+
+    pub fn move_down(&self) -> PieceState {
+        let mut next_piece = self.clone();
+        next_piece.row += 1;
+        next_piece
+    }
 }
 
 pub fn color(piece_type: &PieceType) -> &str {

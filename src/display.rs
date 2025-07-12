@@ -37,7 +37,13 @@ impl Display {
 }
 
 impl Display {
-    pub fn draw(&self, board: &Board, held_piece: &Option<PieceType>, next_piece_type: &PieceType) {
+    pub fn draw(
+        &self,
+        board: &Board,
+        held_piece: &Option<PieceType>,
+        next_piece_type: &PieceType,
+        ghost_piece: &PieceState,
+    ) {
         self.context.clear_rect(
             0.0,
             0.0,
@@ -54,8 +60,45 @@ impl Display {
                 .expect("Expected `draw_held_piece` call to succeed");
         }
 
-        self.draw_next_piece(next_piece_type).expect("Expected `draw_next_piece` call to succeed");
-        
+        self.draw_ghost_piece(ghost_piece)
+            .expect("Expected `draw_ghost_piece` call to succeed");
+        self.draw_next_piece(next_piece_type)
+            .expect("Expected `draw_next_piece` call to succeed");
+    }
+
+    fn draw_ghost_piece(&self, piece_state: &PieceState) -> Result<(), JsValue> {
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+
+        self.context.begin_path();
+
+        let color = format!("--{}", piece_state.color());
+
+        let fill_color = window.get_computed_style(&document.document_element().unwrap())?;
+
+        self.context.set_fill_style_str(
+            fill_color
+                .unwrap()
+                .get_property_value(color.as_str())
+                .unwrap()
+                .as_str(),
+        );
+        self.context.set_global_alpha(0.3);
+
+        for (r, c) in piece_state.iter_blocks() {
+            if r >= 0 {
+                self.context.fill_rect(
+                    c as f64 * self.cell_size as f64,
+                    r as f64 * self.cell_size as f64,
+                    self.cell_size as f64,
+                    self.cell_size as f64,
+                )
+            }
+        }
+        self.context.fill();
+        self.context.set_global_alpha(1.0);
+
+        Ok(())
     }
 
     fn draw_board(&self, board: &Board) -> Result<(), JsValue> {
