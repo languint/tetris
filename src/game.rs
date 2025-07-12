@@ -1,11 +1,18 @@
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-use crate::{board::Board, display::{self, Display}, log, utils};
+use crate::{
+    board::Board,
+    display::{self, Display},
+    log,
+    pieces::{PieceState, PieceType},
+    utils,
+};
 
 #[wasm_bindgen]
 pub struct Game {
     board: Board,
     display: Display,
+    time_since_last_drop: f64,
 }
 
 #[wasm_bindgen]
@@ -16,6 +23,7 @@ impl Game {
         let mut game = Game {
             board: Board::new(),
             display: Display::new()?,
+            time_since_last_drop: 0.0,
         };
         game.resize();
         wasm_bindgen_futures::spawn_local(async move {
@@ -26,9 +34,23 @@ impl Game {
         Ok(game)
     }
 
-    pub fn tick(&mut self) {
+    pub fn tick(&mut self, delta_time: f64) {
         self.display.draw(&self.board);
-        // self.board.current_piece.row += 1;
+
+        self.time_since_last_drop += delta_time;
+        let drop_interval = 500.0; // milliseconds
+
+        if self.time_since_last_drop >= drop_interval {
+            self.time_since_last_drop -= drop_interval;
+            let mut next_piece = self.board.current_piece.clone();
+            next_piece.row += 1;
+            if self.board.is_valid_position(&next_piece) {
+                self.board.current_piece = next_piece;
+            } else {
+                self.board.lock_piece();
+                self.board.current_piece = PieceState::new(PieceType::Straight, 0);
+            }
+        }
     }
 
     pub fn resize(&mut self) {

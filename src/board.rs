@@ -10,6 +10,7 @@ pub struct Board {
     pub width: u32,
     pub height: u32,
     pub(crate) current_piece: PieceState,
+    pub(crate) placed_pieces: Vec<Vec<Option<String>>>,
 }
 
 impl Default for Board {
@@ -26,7 +27,8 @@ impl Board {
         Board {
             width: 10,
             height: 20,
-            current_piece: PieceState::new(PieceType::Straight),
+            current_piece: PieceState::new(PieceType::Straight, 0),
+            placed_pieces: vec![vec![None; 10]; 20],
         }
     }
 
@@ -36,5 +38,23 @@ impl Board {
 
     pub fn height(&self) -> u32 {
         self.height
+    }
+}
+
+impl Board {
+    pub(crate) fn is_valid_position(&self, piece: &PieceState) -> bool {
+        piece.iter_blocks().all(|(r, c)| {
+            if r < 0 || r >= self.height as i8 || c < 0 || c >= self.width as i8 {
+                return false; // Out of bounds
+            }
+            self.placed_pieces[r as usize][c as usize].is_none()
+        })
+    }
+
+    pub(crate) fn lock_piece(&mut self) {
+        let color = self.current_piece.color();
+        for (r, c) in self.current_piece.iter_blocks() {
+            self.placed_pieces[r as usize][c as usize] = Some(color.to_string());
+        }
     }
 }

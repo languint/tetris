@@ -42,8 +42,35 @@ impl Display {
             self.canvas.width().into(),
             self.canvas.height().into(),
         );
+        self.draw_board(board)
+            .expect("Expected `draw_board` call to succeed");
         self.draw_piece(board)
             .expect("Expected `draw_piece` call to succeed");
+    }
+
+    fn draw_board(&self, board: &Board) -> Result<(), JsValue> {
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+        let root = document.document_element().unwrap();
+        let style = window.get_computed_style(&root).unwrap().unwrap();
+
+        self.context.begin_path();
+        for (r, row) in board.placed_pieces.iter().enumerate() {
+            for (c, color) in row.iter().enumerate() {
+                if let Some(color) = color {
+                    let fill_color = style.get_property_value(&format!("--{}", color)).unwrap();
+                    self.context.set_fill_style_str(&fill_color);
+                    self.context.fill_rect(
+                        (c as u32 * self.cell_size) as f64,
+                        (r as u32 * self.cell_size) as f64,
+                        self.cell_size as f64,
+                        self.cell_size as f64,
+                    );
+                }
+            }
+        }
+        self.context.fill();
+        Ok(())
     }
 
     fn draw_piece(&self, board: &Board) -> Result<(), JsValue> {
@@ -67,8 +94,8 @@ impl Display {
         for (r, c) in board.current_piece.iter_blocks() {
             if r >= 0 {
                 self.context.fill_rect(
-                    (c * self.cell_size as i8) as f64,
-                    (r * self.cell_size as i8) as f64,
+                    (c as f64 * self.cell_size as f64),
+                    (r as f64 * self.cell_size as f64),
                     self.cell_size as f64,
                     self.cell_size as f64,
                 )

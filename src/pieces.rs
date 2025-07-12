@@ -1,9 +1,11 @@
+#[derive(Clone)]
 pub struct PieceRotation {
     pub(crate) trans_row: i8,
     pub(crate) trans_col: i8,
     pub(crate) rows: Vec<Vec<i8>>,
 }
 
+#[derive(Clone)]
 pub enum PieceType {
     Straight,
     LLeft,
@@ -14,6 +16,7 @@ pub enum PieceType {
     T,
 }
 
+#[derive(Clone)]
 pub struct Piece {
     pub(crate) rotations: Vec<PieceRotation>,
 }
@@ -26,6 +29,18 @@ pub struct PieceState {
     pub(crate) rotation: u8,
 }
 
+impl Clone for PieceState {
+    fn clone(&self) -> Self {
+        PieceState {
+            piece: Piece::get_piece_data(&self.piece_type),
+            piece_type: self.piece_type.clone(),
+            row: self.row,
+            col: self.col,
+            rotation: self.rotation,
+        }
+    }
+}
+
 impl Piece {
     pub fn new(rotations: Vec<PieceRotation>) -> Piece {
         Piece { rotations }
@@ -36,7 +51,7 @@ impl Piece {
             PieceType::Straight => vec![
                 PieceRotation {
                     trans_row: 1,
-                    trans_col: -1,
+                    trans_col: 0,
                     rows: vec![vec![1, 1, 1, 1]],
                 },
                 PieceRotation {
@@ -73,12 +88,12 @@ impl Piece {
 }
 
 impl PieceState {
-    pub fn new(piece_type: PieceType) -> PieceState {
+    pub fn new(piece_type: PieceType, column: i8) -> PieceState {
         PieceState {
             piece: Piece::get_piece_data(&piece_type),
             piece_type,
             row: 0,
-            col: 0,
+            col: column,
             rotation: 0,
         }
     }
