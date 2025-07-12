@@ -1,12 +1,15 @@
 use wasm_bindgen::prelude::*;
 
-use crate::utils;
+use crate::{
+    pieces::{PieceState, PieceType},
+    utils,
+};
 
 #[wasm_bindgen]
-#[derive(Clone, Copy)]
 pub struct Board {
     pub width: u32,
     pub height: u32,
+    pub(crate) current_piece: PieceState,
 }
 
 impl Default for Board {
@@ -23,6 +26,7 @@ impl Board {
         Board {
             width: 10,
             height: 20,
+            current_piece: PieceState::new(PieceType::Straight),
         }
     }
 

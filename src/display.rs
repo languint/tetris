@@ -2,41 +2,113 @@ use std::cmp;
 
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{Element, HtmlCanvasElement, HtmlHtmlElement};
+use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, HtmlHtmlElement};
 
-use crate::{board::Board, log, utils::sleep};
+use crate::{board::Board, utils::sleep};
 
 #[wasm_bindgen]
-pub fn resize(board: &Board) -> Result<(), JsValue> {
-    log("resize");
-    let window = web_sys::window().expect("no global `window` exists");
-    let document = window.document().expect("should have a document on window");
+pub struct Display {
+    canvas: HtmlCanvasElement,
+    context: CanvasRenderingContext2d,
+    cell_size: u32,
+}
 
-    let game_container = document
-        .query_selector(".game-container")?
-        .expect("Expected `.game-container` element");
+#[wasm_bindgen]
+impl Display {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Result<Display, JsValue> {
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+        let canvas = document
+            .query_selector(".game-canvas")?
+            .expect("Expected `.game-canvas` element")
+            .dyn_into::<HtmlCanvasElement>()?;
+        let context = canvas
+            .get_context("2d")?
+            .unwrap()
+            .dyn_into::<CanvasRenderingContext2d>()?;
 
-    let available_width = game_container.client_width() as u32;
-    let available_height = game_container.client_height() as u32;
+        Ok(Display {
+            canvas,
+            context,
+            cell_size: 20,
+        })
+    }
 
-    let cell_size = cmp::min(
-        available_width / board.width,
-        available_height / board.height,
-    );
+    pub fn draw(&self, board: &Board) {
+        self.context.clear_rect(
+            0.0,
+            0.0,
+            self.canvas.width().into(),
+            self.canvas.height().into(),
+        );
+        self.draw_piece(board)
+            .expect("Expected `draw_piece` call to succeed");
+    }
 
-    let canvas: HtmlCanvasElement = document
-        .query_selector(".game-canvas")?
-        .expect("Expected `.game-canvas` element")
-        .dyn_into::<HtmlCanvasElement>()?;
+    fn draw_piece(&self, board: &Board) -> Result<(), JsValue> {
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
 
-    canvas.set_width(board.width * cell_size);
-    canvas.set_height(board.height * cell_size);
+        self.context.begin_path();
 
-    let html_element: HtmlHtmlElement = document.document_element().unwrap().dyn_into::<HtmlHtmlElement>()?;
+        let color = format!("--{}", board.current_piece.color());
 
-    html_element.style().set_property("--cell-size", format!("{cell_size}px").as_str())?;
+        let fill_color = window.get_computed_style(&document.document_element().unwrap())?;
 
-    Ok(())
+        self.context.set_fill_style_str(
+            fill_color
+                .unwrap()
+                .get_property_value(color.as_str())
+                .unwrap()
+                .as_str(),
+        );
+
+        for (r, c) in board.current_piece.iter_blocks() {
+            if r >= 0 {
+                self.context.fill_rect(
+                    (c * self.cell_size as i8) as f64,
+                    (r * self.cell_size as i8) as f64,
+                    self.cell_size as f64,
+                    self.cell_size as f64,
+                )
+            }
+        }
+        self.context.fill();
+
+        Ok(())
+    }
+
+    pub fn resize(&mut self, board: &Board) -> Result<(), JsValue> {
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+
+        let game_container = document
+            .query_selector(".game-container")?
+            .expect("Expected `.game-container` element");
+
+        let available_width = game_container.client_width() as u32;
+        let available_height = game_container.client_height() as u32;
+
+        self.cell_size = cmp::min(
+            available_width / board.width,
+            available_height / board.height,
+        );
+
+        self.canvas.set_width(board.width * self.cell_size);
+        self.canvas.set_height(board.height * self.cell_size);
+
+        let html_element: HtmlHtmlElement = document
+            .document_element()
+            .unwrap()
+            .dyn_into::<HtmlHtmlElement>()?;
+
+        html_element
+            .style()
+            .set_property("--cell-size", format!("{}px", self.cell_size).as_str())?;
+
+        Ok(())
+    }
 }
 
 pub async fn intro_animation() -> Result<(), JsValue> {

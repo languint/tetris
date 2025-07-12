@@ -1,11 +1,13 @@
 
-import { Board } from "wasm-tetris";
-import * as wasm from "wasm-tetris";
+import { Game } from "wasm-tetris";
 
-const board = new Board();
+const game = new Game();
 
-window.onresize = () => {console.log("A"); wasm.resize(board)};
+window.onresize = () => game.resize();
 
-wasm.resize(board);
+const renderLoop = () => {
+  game.tick();
+  requestAnimationFrame(renderLoop);
+};
 
-wasm.run();
+requestAnimationFrame(renderLoop);
