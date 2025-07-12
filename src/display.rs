@@ -137,7 +137,7 @@ impl Display {
             held_canvas.height().into(),
         );
 
-        let piece_state = PieceState::new(held_piece_type.clone(), 0); // Create a PieceState for drawing
+        let piece_state = PieceState::new(held_piece_type.clone(), 0);
 
         held_context.begin_path();
 
@@ -168,15 +168,27 @@ impl Display {
         let piece_width = (max_c - min_c + 1) as u32 * self.cell_size;
         let piece_height = (max_r - min_r + 1) as u32 * self.cell_size;
 
-        let offset_x = (held_canvas.width() as i32 - piece_width as i32) / 2;
-        let offset_y = (held_canvas.height() as i32 - piece_height as i32) / 2;
+        let piece_width_cells = max_c - min_c + 1;
+        let piece_height_cells = max_r - min_r + 1;
+
+        let scale_x = held_canvas.width() as f64 / (piece_width_cells as f64 * self.cell_size as f64);
+        let scale_y = held_canvas.height() as f64 / (piece_height_cells as f64 * self.cell_size as f64);
+        let scale_factor = scale_x.min(scale_y);
+
+        let scaled_cell_size = self.cell_size as f64 * scale_factor;
+
+        let scaled_piece_width = piece_width_cells as f64 * scaled_cell_size;
+        let scaled_piece_height = piece_height_cells as f64 * scaled_cell_size;
+
+        let offset_x = (held_canvas.width() as f64 - scaled_piece_width) / 2.0;
+        let offset_y = (held_canvas.height() as f64 - scaled_piece_height) / 2.0;
 
         for (r, c) in piece_state.iter_blocks() {
             held_context.fill_rect(
-                (c as f64 * self.cell_size as f64) + offset_x as f64,
-                (r as f64 * self.cell_size as f64) + offset_y as f64,
-                self.cell_size as f64,
-                self.cell_size as f64,
+                ((c - min_c) as f64 * scaled_cell_size) + offset_x,
+                ((r - min_r) as f64 * scaled_cell_size) + offset_y,
+                scaled_cell_size,
+                scaled_cell_size,
             )
         }
         held_context.fill();
@@ -236,15 +248,27 @@ impl Display {
         let piece_width = (max_c - min_c + 1) as u32 * self.cell_size;
         let piece_height = (max_r - min_r + 1) as u32 * self.cell_size;
 
-        let offset_x = (next_canvas.width() as i32 - piece_width as i32) / 2;
-        let offset_y = (next_canvas.height() as i32 - piece_height as i32) / 2;
+        let piece_width_cells = max_c - min_c + 1;
+        let piece_height_cells = max_r - min_r + 1;
+
+        let scale_x = next_canvas.width() as f64 / (piece_width_cells as f64 * self.cell_size as f64);
+        let scale_y = next_canvas.height() as f64 / (piece_height_cells as f64 * self.cell_size as f64);
+        let scale_factor = scale_x.min(scale_y);
+
+        let scaled_cell_size = self.cell_size as f64 * scale_factor;
+
+        let scaled_piece_width = piece_width_cells as f64 * scaled_cell_size;
+        let scaled_piece_height = piece_height_cells as f64 * scaled_cell_size;
+
+        let offset_x = (next_canvas.width() as f64 - scaled_piece_width) / 2.0;
+        let offset_y = (next_canvas.height() as f64 - scaled_piece_height) / 2.0;
 
         for (r, c) in piece_state.iter_blocks() {
             held_context.fill_rect(
-                (c as f64 * self.cell_size as f64) + offset_x as f64,
-                (r as f64 * self.cell_size as f64) + offset_y as f64,
-                self.cell_size as f64,
-                self.cell_size as f64,
+                ((c - min_c) as f64 * scaled_cell_size) + offset_x,
+                ((r - min_r) as f64 * scaled_cell_size) + offset_y,
+                scaled_cell_size,
+                scaled_cell_size,
             )
         }
         held_context.fill();
