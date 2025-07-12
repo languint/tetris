@@ -4,7 +4,7 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, HtmlHtmlElement};
 
-use crate::{board::Board, pieces::{Piece, PieceState, PieceType}, utils::sleep};
+use crate::{board::Board, pieces::{PieceState, PieceType}, utils::sleep};
 
 #[wasm_bindgen]
 pub struct Display {

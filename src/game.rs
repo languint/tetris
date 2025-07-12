@@ -8,6 +8,8 @@ use crate::{
     pieces::{PieceState, PieceType},
     utils,
 };
+use web_sys::js_sys::Math;
+
 
 #[wasm_bindgen]
 pub struct Game {
@@ -19,6 +21,8 @@ pub struct Game {
     held_piece: Option<PieceType>,
     can_hold_this_turn: bool,
     next_piece: PieceType,
+    bag: Vec<PieceType>,
+    bag_index: usize,
 }
 
 #[wasm_bindgen]
@@ -34,8 +38,13 @@ impl Game {
             score: 0,
             held_piece: None,
             can_hold_this_turn: true,
-            next_piece: Game::get_next_piece(),
+            next_piece: PieceType::Straight, // Placeholder, will be set by new_bag
+            bag: Vec::new(),
+            bag_index: 0,
         };
+
+        game.new_bag();
+        game.next_piece = game.get_next_piece();
 
         game.resize();
         wasm_bindgen_futures::spawn_local(async move {
@@ -90,7 +99,7 @@ impl Game {
                 self.board.current_piece = PieceState::new(self.next_piece.clone(), self.cursor_x);
 
                 self.can_hold_this_turn = true;
-                let new_piece_type = Game::get_next_piece();
+                let new_piece_type = self.get_next_piece();
                 self.next_piece = new_piece_type;
             }
         }
@@ -104,17 +113,34 @@ impl Game {
 }
 
 impl Game {
-    fn get_next_piece() -> PieceType {
-        match utils::get_random_int(0, 6) {
-            0 => PieceType::Straight,
-            1 => PieceType::LLeft,
-            2 => PieceType::LRight,
-            3 => PieceType::Square,
-            4 => PieceType::S,
-            5 => PieceType::Z,
-            6 => PieceType::T,
-            _ => unreachable!(),
+    fn new_bag(&mut self) {
+        let mut pieces = vec![
+            PieceType::Straight,
+            PieceType::LLeft,
+            PieceType::LRight,
+            PieceType::Square,
+            PieceType::S,
+            PieceType::Z,
+            PieceType::T,
+        ];
+
+        // Fisher-Yates shuffle
+        for i in (0..pieces.len()).rev() {
+            let j = (Math::random() * (i + 1) as f64) as usize;
+            pieces.swap(i, j);
         }
+
+        self.bag = pieces;
+        self.bag_index = 0;
+    }
+
+    fn get_next_piece(&mut self) -> PieceType {
+        if self.bag_index >= self.bag.len() {
+            self.new_bag();
+        }
+        let piece = self.bag[self.bag_index].clone();
+        self.bag_index += 1;
+        piece
     }
 }
 
@@ -171,7 +197,7 @@ impl Game {
                 self.board.current_piece = PieceState::new(self.next_piece.clone(), self.cursor_x);
 
                 self.can_hold_this_turn = true;
-                let new_piece_type = Game::get_next_piece();
+                let new_piece_type = self.get_next_piece();
                 self.next_piece = new_piece_type;
                 break;
             }
@@ -195,7 +221,7 @@ impl Game {
             self.board.current_piece = PieceState::new(self.next_piece.clone(), self.cursor_x);
 
             self.can_hold_this_turn = true;
-            let new_piece_type = Game::get_next_piece();
+            let new_piece_type = self.get_next_piece();
             self.next_piece = new_piece_type;
         }
     }
