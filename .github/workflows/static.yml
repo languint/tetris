@@ -37,6 +37,10 @@ jobs:
           
       - name: Package wasm
         run: wasm-pack build --target web --out-dir pkg
+
+      - name: Install wasm
+        working-directory: www
+        run: npm i
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
