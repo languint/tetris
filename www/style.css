@@ -119,8 +119,8 @@ body {
 
 .next-canvas {
     background-color: var(--base);
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 75px;
 }
 
 .held-canvas {

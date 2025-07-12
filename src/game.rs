@@ -18,6 +18,7 @@ pub struct Game {
     score: u32,
     held_piece: Option<PieceType>,
     can_hold_this_turn: bool,
+    next_piece: PieceType,
 }
 
 #[wasm_bindgen]
@@ -33,6 +34,7 @@ impl Game {
             score: 0,
             held_piece: None,
             can_hold_this_turn: true,
+            next_piece: Game::get_next_piece(),
         };
 
         game.resize();
@@ -45,7 +47,8 @@ impl Game {
     }
 
     pub fn tick(&mut self, delta_time: f64) {
-        self.display.draw(&self.board, &self.held_piece);
+        self.display
+            .draw(&self.board, &self.held_piece, &self.next_piece);
 
         let window = web_sys::window().expect("no global `window` exists");
         let document = window.document().expect("should have a document on window");
@@ -70,7 +73,7 @@ impl Game {
             } else {
                 self.board.lock_piece();
                 let lines_cleared = self.board.clear_lines();
-                log(format!("{}", lines_cleared).as_str());
+
                 self.score += match lines_cleared {
                     1 => 100,
                     2 => 300,
@@ -78,9 +81,12 @@ impl Game {
                     4 => 800,
                     _ => 0,
                 };
-                let new_piece_type = self.get_next_piece();
-                self.board.current_piece = PieceState::new(new_piece_type, self.cursor_x);
+
+                self.board.current_piece = PieceState::new(self.next_piece.clone(), self.cursor_x);
+
                 self.can_hold_this_turn = true;
+                let new_piece_type = Game::get_next_piece();
+                self.next_piece = new_piece_type;
             }
         }
     }
@@ -93,7 +99,7 @@ impl Game {
 }
 
 impl Game {
-    fn get_next_piece(&self) -> PieceType {
+    fn get_next_piece() -> PieceType {
         match utils::get_random_int(0, 6) {
             0 => PieceType::Straight,
             1 => PieceType::LLeft,
@@ -157,9 +163,11 @@ impl Game {
                     4 => 800,
                     _ => 0,
                 };
-                let new_piece_type = self.get_next_piece();
-                self.board.current_piece = PieceState::new(new_piece_type, self.cursor_x);
+                self.board.current_piece = PieceState::new(self.next_piece.clone(), self.cursor_x);
+
                 self.can_hold_this_turn = true;
+                let new_piece_type = Game::get_next_piece();
+                self.next_piece = new_piece_type;
                 break;
             }
         }
@@ -175,14 +183,15 @@ impl Game {
         let current_piece_type = self.board.current_piece.piece_type.clone();
 
         if let Some(held) = self.held_piece.take() {
-            // Swap: current piece becomes held, held piece becomes current
             self.board.current_piece = PieceState::new(held, self.cursor_x);
             self.held_piece = Some(current_piece_type);
         } else {
-            // No held piece: current piece becomes held, new random piece becomes current
             self.held_piece = Some(current_piece_type);
-            let new_piece_type = self.get_next_piece();
-            self.board.current_piece = PieceState::new(new_piece_type, self.cursor_x);
+            self.board.current_piece = PieceState::new(self.next_piece.clone(), self.cursor_x);
+
+            self.can_hold_this_turn = true;
+            let new_piece_type = Game::get_next_piece();
+            self.next_piece = new_piece_type;
         }
     }
 }

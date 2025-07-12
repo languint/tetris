@@ -37,7 +37,7 @@ impl Display {
 }
 
 impl Display {
-    pub fn draw(&self, board: &Board, held_piece: &Option<PieceType>) {
+    pub fn draw(&self, board: &Board, held_piece: &Option<PieceType>, next_piece_type: &PieceType) {
         self.context.clear_rect(
             0.0,
             0.0,
@@ -53,6 +53,9 @@ impl Display {
             self.draw_held_piece(piece_type)
                 .expect("Expected `draw_held_piece` call to succeed");
         }
+
+        self.draw_next_piece(next_piece_type).expect("Expected `draw_next_piece` call to succeed");
+        
     }
 
     fn draw_board(&self, board: &Board) -> Result<(), JsValue> {
@@ -127,7 +130,6 @@ impl Display {
             .expect("Expected 2d context")
             .dyn_into::<CanvasRenderingContext2d>()?;
 
-        // Clear the held canvas
         held_context.clear_rect(
             0.0,
             0.0,
@@ -151,10 +153,9 @@ impl Display {
                 .as_str(),
         );
 
-        // Calculate offset to center the piece in the held canvas
-        let mut min_r = 4; // Max possible row for a piece is 4 (I-piece vertical)
+        let mut min_r = 4;
         let mut max_r = 0;
-        let mut min_c = 4; // Max possible col for a piece is 4 (I-piece horizontal)
+        let mut min_c = 4;
         let mut max_c = 0;
 
         for (r, c) in piece_state.iter_blocks() {
@@ -169,6 +170,74 @@ impl Display {
 
         let offset_x = (held_canvas.width() as i32 - piece_width as i32) / 2;
         let offset_y = (held_canvas.height() as i32 - piece_height as i32) / 2;
+
+        for (r, c) in piece_state.iter_blocks() {
+            held_context.fill_rect(
+                (c as f64 * self.cell_size as f64) + offset_x as f64,
+                (r as f64 * self.cell_size as f64) + offset_y as f64,
+                self.cell_size as f64,
+                self.cell_size as f64,
+            )
+        }
+        held_context.fill();
+
+        Ok(())
+    }
+
+  fn draw_next_piece(&self, next_piece_type: &PieceType) -> Result<(), JsValue> {
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+        let next_canvas = document
+            .query_selector(".next-canvas")?
+            .expect("Expected `.next-canvas` element")
+            .dyn_into::<HtmlCanvasElement>()
+            .expect("Expected `dyn_into` cast to succeed");
+
+        let held_context = next_canvas
+            .get_context("2d")?
+            .expect("Expected 2d context")
+            .dyn_into::<CanvasRenderingContext2d>()?;
+
+        held_context.clear_rect(
+            0.0,
+            0.0,
+            next_canvas.width().into(),
+            next_canvas.height().into(),
+        );
+
+        let piece_state = PieceState::new(next_piece_type.clone(), 0);
+
+        held_context.begin_path();
+
+        let color = format!("--{}", piece_state.color());
+
+        let fill_color = window.get_computed_style(&document.document_element().unwrap())?;
+
+        held_context.set_fill_style_str(
+            fill_color
+                .unwrap()
+                .get_property_value(color.as_str())
+                .unwrap()
+                .as_str(),
+        );
+
+        let mut min_r = 4;
+        let mut max_r = 0;
+        let mut min_c = 4;
+        let mut max_c = 0;
+
+        for (r, c) in piece_state.iter_blocks() {
+            min_r = cmp::min(min_r, r);
+            max_r = cmp::max(max_r, r);
+            min_c = cmp::min(min_c, c);
+            max_c = cmp::max(max_c, c);
+        }
+
+        let piece_width = (max_c - min_c + 1) as u32 * self.cell_size;
+        let piece_height = (max_r - min_r + 1) as u32 * self.cell_size;
+
+        let offset_x = (next_canvas.width() as i32 - piece_width as i32) / 2;
+        let offset_y = (next_canvas.height() as i32 - piece_height as i32) / 2;
 
         for (r, c) in piece_state.iter_blocks() {
             held_context.fill_rect(
