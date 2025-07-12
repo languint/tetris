@@ -22,6 +22,7 @@ pub struct Game {
     next_piece: PieceType,
     bag: Vec<PieceType>,
     bag_index: usize,
+    drop_interval_ms: i32,
 }
 
 #[wasm_bindgen]
@@ -40,6 +41,7 @@ impl Game {
             next_piece: PieceType::Straight, // Placeholder, will be set by new_bag
             bag: Vec::new(),
             bag_index: 0,
+            drop_interval_ms: 1000,
         };
 
         game.new_bag();
@@ -79,10 +81,9 @@ impl Game {
         score_element.set_inner_text(format!("{}", self.score).as_str());
 
         self.time_since_last_drop += delta_time;
-        let drop_interval = 500.0;
 
-        if self.time_since_last_drop >= drop_interval {
-            self.time_since_last_drop -= drop_interval;
+        if self.time_since_last_drop >= self.drop_interval_ms.into() {
+            self.time_since_last_drop -= self.drop_interval_ms as f64;
             let mut next_piece = self.board.current_piece.clone();
             next_piece.row += 1;
             if self.board.is_valid_position(&next_piece) {
@@ -221,6 +222,29 @@ impl Game {
             self.held_piece = Some(current_piece_type);
         } else {
             self.held_piece = Some(current_piece_type);
+            self.board.current_piece = PieceState::new(self.next_piece.clone(), self.cursor_x);
+
+            self.can_hold_this_turn = true;
+            let new_piece_type = self.get_next_piece();
+            self.next_piece = new_piece_type;
+        }
+    }
+
+    pub fn soft_drop(&mut self) {
+        let mut next_piece = self.board.current_piece.clone();
+        next_piece.row += 1;
+        if self.board.is_valid_position(&next_piece) {
+            self.board.current_piece = next_piece;
+        } else {
+            self.board.lock_piece();
+            let lines_cleared = self.board.clear_lines();
+            self.score += match lines_cleared {
+                1 => 100,
+                2 => 300,
+                3 => 500,
+                4 => 800,
+                _ => 0,
+            };
             self.board.current_piece = PieceState::new(self.next_piece.clone(), self.cursor_x);
 
             self.can_hold_this_turn = true;

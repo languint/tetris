@@ -33,8 +33,12 @@ addEventListener("keydown", (e) => {
       game.hard_drop_current_piece();
       break;
     case "KeyC":
-    case "Shift":
+    case "ShiftLeft":
+    case "ShiftRight":
       game.hold_piece();
+    case "KeyS":
+    case "ArrowDown":
+      game.soft_drop();
   }
 })
 
