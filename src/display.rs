@@ -4,7 +4,7 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, HtmlHtmlElement};
 
-use crate::{board::Board, utils::sleep};
+use crate::{board::Board, pieces::{Piece, PieceState, PieceType}, utils::sleep};
 
 #[wasm_bindgen]
 pub struct Display {
@@ -34,8 +34,10 @@ impl Display {
             cell_size: 20,
         })
     }
+}
 
-    pub fn draw(&self, board: &Board) {
+impl Display {
+    pub fn draw(&self, board: &Board, held_piece: &Option<PieceType>) {
         self.context.clear_rect(
             0.0,
             0.0,
@@ -46,6 +48,11 @@ impl Display {
             .expect("Expected `draw_board` call to succeed");
         self.draw_piece(board)
             .expect("Expected `draw_piece` call to succeed");
+
+        if let Some(piece_type) = held_piece {
+            self.draw_held_piece(piece_type)
+                .expect("Expected `draw_held_piece` call to succeed");
+        }
     }
 
     fn draw_board(&self, board: &Board) -> Result<(), JsValue> {
@@ -102,6 +109,76 @@ impl Display {
             }
         }
         self.context.fill();
+
+        Ok(())
+    }
+
+    fn draw_held_piece(&self, held_piece_type: &PieceType) -> Result<(), JsValue> {
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+        let held_canvas = document
+            .query_selector(".held-canvas")?
+            .expect("Expected `.held-canvas` element")
+            .dyn_into::<HtmlCanvasElement>()
+            .expect("Expected `dyn_into` cast to succeed");
+
+        let held_context = held_canvas
+            .get_context("2d")?
+            .expect("Expected 2d context")
+            .dyn_into::<CanvasRenderingContext2d>()?;
+
+        // Clear the held canvas
+        held_context.clear_rect(
+            0.0,
+            0.0,
+            held_canvas.width().into(),
+            held_canvas.height().into(),
+        );
+
+        let piece_state = PieceState::new(held_piece_type.clone(), 0); // Create a PieceState for drawing
+
+        held_context.begin_path();
+
+        let color = format!("--{}", piece_state.color());
+
+        let fill_color = window.get_computed_style(&document.document_element().unwrap())?;
+
+        held_context.set_fill_style_str(
+            fill_color
+                .unwrap()
+                .get_property_value(color.as_str())
+                .unwrap()
+                .as_str(),
+        );
+
+        // Calculate offset to center the piece in the held canvas
+        let mut min_r = 4; // Max possible row for a piece is 4 (I-piece vertical)
+        let mut max_r = 0;
+        let mut min_c = 4; // Max possible col for a piece is 4 (I-piece horizontal)
+        let mut max_c = 0;
+
+        for (r, c) in piece_state.iter_blocks() {
+            min_r = cmp::min(min_r, r);
+            max_r = cmp::max(max_r, r);
+            min_c = cmp::min(min_c, c);
+            max_c = cmp::max(max_c, c);
+        }
+
+        let piece_width = (max_c - min_c + 1) as u32 * self.cell_size;
+        let piece_height = (max_r - min_r + 1) as u32 * self.cell_size;
+
+        let offset_x = (held_canvas.width() as i32 - piece_width as i32) / 2;
+        let offset_y = (held_canvas.height() as i32 - piece_height as i32) / 2;
+
+        for (r, c) in piece_state.iter_blocks() {
+            held_context.fill_rect(
+                (c as f64 * self.cell_size as f64) + offset_x as f64,
+                (r as f64 * self.cell_size as f64) + offset_y as f64,
+                self.cell_size as f64,
+                self.cell_size as f64,
+            )
+        }
+        held_context.fill();
 
         Ok(())
     }

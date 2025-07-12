@@ -45,7 +45,7 @@ impl Board {
     pub(crate) fn is_valid_position(&self, piece: &PieceState) -> bool {
         piece.iter_blocks().all(|(r, c)| {
             if r < 0 || r >= self.height as i8 || c < 0 || c >= self.width as i8 {
-                return false; // Out of bounds
+                return false;
             }
             self.placed_pieces[r as usize][c as usize].is_none()
         })
@@ -63,7 +63,7 @@ impl Board {
         let mut r = self.height as usize - 1;
         while r >= 0 {
             if self.placed_pieces[r].iter().all(Option::is_some) {
-                // Line is full, remove it
+            
                 for i in (1..=r).rev() {
                     self.placed_pieces[i] = self.placed_pieces[i - 1].clone();
                 }
@@ -72,7 +72,7 @@ impl Board {
             } else {
                 r -= 1;
             }
-            if r == usize::MAX { // Handle underflow for r=0
+            if r == usize::MAX {
                 break;
             }
         }

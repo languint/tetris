@@ -5,7 +5,7 @@ pub struct PieceRotation {
     pub(crate) rows: Vec<Vec<i8>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum PieceType {
     Straight,
     LLeft,
@@ -199,5 +199,17 @@ impl PieceState {
 
     pub fn rotate(&mut self) {
         self.rotation = (self.rotation + 1) % self.piece.rotations.len() as u8;
+    }
+}
+
+pub fn color(piece_type: &PieceType) -> &str {
+    match piece_type {
+        PieceType::Straight => "light-blue",
+        PieceType::LLeft => "blue",
+        PieceType::LRight => "orange",
+        PieceType::Square => "yellow",
+        PieceType::Z => "red",
+        PieceType::S => "green",
+        PieceType::T => "purple",
     }
 }

@@ -12,8 +12,6 @@ const renderLoop = (currentTime) => {
 
   game.tick(deltaTime);
 
-  document.getElementById("score").innerText = game.score();
-
   requestAnimationFrame(renderLoop);
 };
 
@@ -34,6 +32,9 @@ addEventListener("keydown", (e) => {
     case "Space":
       game.hard_drop_current_piece();
       break;
+    case "KeyC":
+    case "Shift":
+      game.hold_piece();
   }
 })
 
