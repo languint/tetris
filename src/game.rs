@@ -13,6 +13,7 @@ pub struct Game {
     board: Board,
     display: Display,
     time_since_last_drop: f64,
+    cursor_x: i8,
 }
 
 #[wasm_bindgen]
@@ -24,6 +25,7 @@ impl Game {
             board: Board::new(),
             display: Display::new()?,
             time_since_last_drop: 0.0,
+            cursor_x: 3, // Initial cursor position
         };
         game.resize();
         wasm_bindgen_futures::spawn_local(async move {
@@ -49,7 +51,54 @@ impl Game {
             } else {
                 self.board.lock_piece();
                 let new_piece_type = self.get_next_piece();
-                self.board.current_piece = PieceState::new(new_piece_type, 3); // Start at column 3
+                self.board.current_piece = PieceState::new(new_piece_type, self.cursor_x);
+            }
+        }
+    }
+
+    pub fn move_cursor_left(&mut self) {
+        let mut next_piece = self.board.current_piece.clone();
+        next_piece.col -= 1;
+        if self.board.is_valid_position(&next_piece) {
+            self.board.current_piece = next_piece;
+        }
+    }
+
+    pub fn move_cursor_right(&mut self) {
+        let mut next_piece = self.board.current_piece.clone();
+        next_piece.col += 1;
+        if self.board.is_valid_position(&next_piece) {
+            self.board.current_piece = next_piece;
+        }
+    }
+
+    pub fn rotate_current_piece(&mut self) {
+        let mut next_piece = self.board.current_piece.clone();
+        next_piece.rotate();
+
+        let kick_offsets = [0, -1, 1, -2, 2];
+
+        for offset in kick_offsets.iter() {
+            let mut kicked_piece = next_piece.clone();
+            kicked_piece.col += offset;
+            if self.board.is_valid_position(&kicked_piece) {
+                self.board.current_piece = kicked_piece;
+                return;
+            }
+        }
+    }
+
+    pub fn hard_drop_current_piece(&mut self) {
+        loop {
+            let mut next_piece = self.board.current_piece.clone();
+            next_piece.row += 1;
+            if self.board.is_valid_position(&next_piece) {
+                self.board.current_piece = next_piece;
+            } else {
+                self.board.lock_piece();
+                let new_piece_type = self.get_next_piece();
+                self.board.current_piece = PieceState::new(new_piece_type, self.cursor_x);
+                break;
             }
         }
     }

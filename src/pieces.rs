@@ -196,4 +196,8 @@ impl PieceState {
             PieceType::T => "purple",
         }
     }
+
+    pub fn rotate(&mut self) {
+        self.rotation = (self.rotation + 1) % self.piece.rotations.len() as u8;
+    }
 }
