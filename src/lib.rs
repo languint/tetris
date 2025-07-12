@@ -1,8 +1,8 @@
 mod board;
 mod display;
+mod game;
 mod pieces;
 mod utils;
-mod game;
 
 use wasm_bindgen::prelude::*;
 
@@ -11,4 +11,3 @@ extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
 }
-

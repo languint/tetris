@@ -56,24 +56,23 @@ impl Board {
         for (r, c) in self.current_piece.iter_blocks() {
             self.placed_pieces[r as usize][c as usize] = Some(color.to_string());
         }
-        }
+    }
 
     pub(crate) fn clear_lines(&mut self) -> u32 {
         let mut lines_cleared = 0;
-        let mut r = self.height as usize - 1;
-        while r >= 0 {
+        let mut r = self.height as usize;
+
+        while r > 0 {
+            r -= 1;
             if self.placed_pieces[r].iter().all(Option::is_some) {
-            
+                lines_cleared += 1;
+
                 for i in (1..=r).rev() {
                     self.placed_pieces[i] = self.placed_pieces[i - 1].clone();
                 }
+
                 self.placed_pieces[0] = vec![None; self.width as usize];
-                lines_cleared += 1;
-            } else {
-                r -= 1;
-            }
-            if r == usize::MAX {
-                break;
+                r += 1;
             }
         }
         lines_cleared

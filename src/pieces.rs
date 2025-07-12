@@ -207,15 +207,3 @@ impl PieceState {
         next_piece
     }
 }
-
-pub fn color(piece_type: &PieceType) -> &str {
-    match piece_type {
-        PieceType::Straight => "light-blue",
-        PieceType::LLeft => "blue",
-        PieceType::LRight => "orange",
-        PieceType::Square => "yellow",
-        PieceType::Z => "red",
-        PieceType::S => "green",
-        PieceType::T => "purple",
-    }
-}

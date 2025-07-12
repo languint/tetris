@@ -4,7 +4,11 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, HtmlHtmlElement};
 
-use crate::{board::Board, pieces::{PieceState, PieceType}, utils::sleep};
+use crate::{
+    board::Board,
+    pieces::{PieceState, PieceType},
+    utils::sleep,
+};
 
 #[wasm_bindgen]
 pub struct Display {
@@ -208,14 +212,13 @@ impl Display {
             max_c = cmp::max(max_c, c);
         }
 
-        let piece_width = (max_c - min_c + 1) as u32 * self.cell_size;
-        let piece_height = (max_r - min_r + 1) as u32 * self.cell_size;
-
         let piece_width_cells = max_c - min_c + 1;
         let piece_height_cells = max_r - min_r + 1;
 
-        let scale_x = held_canvas.width() as f64 / (piece_width_cells as f64 * self.cell_size as f64);
-        let scale_y = held_canvas.height() as f64 / (piece_height_cells as f64 * self.cell_size as f64);
+        let scale_x =
+            held_canvas.width() as f64 / (piece_width_cells as f64 * self.cell_size as f64);
+        let scale_y =
+            held_canvas.height() as f64 / (piece_height_cells as f64 * self.cell_size as f64);
         let scale_factor = scale_x.min(scale_y);
 
         let scaled_cell_size = self.cell_size as f64 * scale_factor;
@@ -239,7 +242,7 @@ impl Display {
         Ok(())
     }
 
-  fn draw_next_piece(&self, next_piece_type: &PieceType) -> Result<(), JsValue> {
+    fn draw_next_piece(&self, next_piece_type: &PieceType) -> Result<(), JsValue> {
         let window = web_sys::window().expect("no global `window` exists");
         let document = window.document().expect("should have a document on window");
         let next_canvas = document
@@ -288,14 +291,13 @@ impl Display {
             max_c = cmp::max(max_c, c);
         }
 
-        let piece_width = (max_c - min_c + 1) as u32 * self.cell_size;
-        let piece_height = (max_r - min_r + 1) as u32 * self.cell_size;
-
         let piece_width_cells = max_c - min_c + 1;
         let piece_height_cells = max_r - min_r + 1;
 
-        let scale_x = next_canvas.width() as f64 / (piece_width_cells as f64 * self.cell_size as f64);
-        let scale_y = next_canvas.height() as f64 / (piece_height_cells as f64 * self.cell_size as f64);
+        let scale_x =
+            next_canvas.width() as f64 / (piece_width_cells as f64 * self.cell_size as f64);
+        let scale_y =
+            next_canvas.height() as f64 / (piece_height_cells as f64 * self.cell_size as f64);
         let scale_factor = scale_x.min(scale_y);
 
         let scaled_cell_size = self.cell_size as f64 * scale_factor;

@@ -1,4 +1,4 @@
-use web_sys::js_sys::{Promise};
+use web_sys::js_sys::Promise;
 
 pub fn set_panic_hook() {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -19,5 +19,3 @@ pub fn sleep(ms: i32) -> Promise {
             .unwrap();
     })
 }
-
-

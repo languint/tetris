@@ -10,7 +10,6 @@ use crate::{
 };
 use web_sys::js_sys::Math;
 
-
 #[wasm_bindgen]
 pub struct Game {
     board: Board,
@@ -61,8 +60,12 @@ impl Game {
             ghost_piece.row += 1;
         }
 
-        self.display
-            .draw(&self.board, &self.held_piece, &self.next_piece, &ghost_piece);
+        self.display.draw(
+            &self.board,
+            &self.held_piece,
+            &self.next_piece,
+            &ghost_piece,
+        );
 
         let window = web_sys::window().expect("no global `window` exists");
         let document = window.document().expect("should have a document on window");
