@@ -38,7 +38,7 @@ impl Game {
             score: 0,
             held_piece: None,
             can_hold_this_turn: true,
-            next_piece: PieceType::Straight, // Placeholder, will be set by new_bag
+            next_piece: PieceType::Straight,
             bag: Vec::new(),
             bag_index: 0,
             drop_interval_ms: 1000,
@@ -128,7 +128,6 @@ impl Game {
             PieceType::T,
         ];
 
-        // Fisher-Yates shuffle
         for i in (0..pieces.len()).rev() {
             let j = (Math::random() * (i + 1) as f64) as usize;
             pieces.swap(i, j);
@@ -170,11 +169,21 @@ impl Game {
         let mut next_piece = self.board.current_piece.clone();
         next_piece.rotate();
 
-        let kick_offsets = [0, -1, 1, -2, 2];
+        let kick_tests = [
+            (0, 0), 
+            (-1, 0),
+            (1, 0), 
+            (0, 1),
+            (-2, 0),
+            (2, 0), 
+            (0, 2), 
+        ];
 
-        for offset in kick_offsets.iter() {
+        for (col_offset, row_offset) in kick_tests.iter() {
             let mut kicked_piece = next_piece.clone();
-            kicked_piece.col += offset;
+            kicked_piece.col += col_offset;
+            kicked_piece.row += row_offset;
+
             if self.board.is_valid_position(&kicked_piece) {
                 self.board.current_piece = kicked_piece;
                 return;

@@ -36,9 +36,11 @@ addEventListener("keydown", (e) => {
     case "ShiftLeft":
     case "ShiftRight":
       game.hold_piece();
+      break;
     case "KeyS":
     case "ArrowDown":
       game.soft_drop();
+      break;
   }
 })
 
