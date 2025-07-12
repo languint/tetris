@@ -6,28 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tetris</title>
     <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 
 <body>
     <div class="app">
         <div class="splashscreen">
             <div class="splashscreen-text">
+                <!-- beautify ignore:start -->
                 <span class="splashscreen-inactive"> _       _        _     </span>
                 <span class="splashscreen-inactive">| |     | |      (_)    </span>
                 <span class="splashscreen-inactive">| |_ ___| |_ _ __ _ ___ </span>
                 <span class="splashscreen-inactive">| __/ _ | __| '__| / __|</span>
                 <span class="splashscreen-inactive">| ||  __| |_| |  | \__ \</span>
                 <span class="splashscreen-inactive"> \__\___|\__|_|  |_|___/</span>
+               <!-- beautify ignore:start -->
             </div>
         </div>
         <div class="game-container">
+            <div class="sidebar-container">
+                <div class="sidebar-box">
+                    <h2>HELD</h2>
+                    <canvas class="held-canvas"></canvas>
+                </div>
+                <div class="sidebar-box keybinds-container">
+                    <h2>KEYBINDS</h2>
+                    <span>MOVE CURSOR LEFT - [A | <span class="material-symbols-outlined">arrow_back</span>]</span>
+                    <span>MOVE CURSOR RIGHT - [D | <span class="material-symbols-outlined">arrow_forward</span>]</span>
+                    <span>MOVE CURSOR DOWN - [S | <span class="material-symbols-outlined">arrow_downward</span>]</span>
+                    <span>ROTATE CURSOR - [R | <span class="material-symbols-outlined">arrow_upward</span>]</span>
+                    <span>HARD DROP - [<span class="material-symbols-outlined">space_bar</span>]</span>
+                </div>
+            </div>
             <div class="canvas-container">
                 <canvas class="game-canvas"></canvas>
             </div>
             <div class="sidebar-container">
                 <div class="sidebar-box">
                     <h2>SCORE</h2>
-                    <p>0</p>
+                    <p id="score">0</p>
                 </div>
                 <div class="sidebar-box">
                     <h2>LINES</h2>

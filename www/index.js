@@ -12,12 +12,15 @@ const renderLoop = (currentTime) => {
 
   game.tick(deltaTime);
 
+  document.getElementById("score").innerText = game.score();
+
   requestAnimationFrame(renderLoop);
 };
 
 addEventListener("keydown", (e) => {
   switch (e.code) {
     case "KeyR":
+    case "ArrowUp":
       game.rotate_current_piece();
       break;
     case "KeyA":

@@ -1,4 +1,5 @@
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
+use web_sys::HtmlParagraphElement;
 
 use crate::{
     board::Board,
@@ -14,6 +15,7 @@ pub struct Game {
     display: Display,
     time_since_last_drop: f64,
     cursor_x: i8,
+    score: u32,
 }
 
 #[wasm_bindgen]
@@ -26,6 +28,7 @@ impl Game {
             display: Display::new()?,
             time_since_last_drop: 0.0,
             cursor_x: 3, // Initial cursor position
+            score: 0,
         };
         game.resize();
         wasm_bindgen_futures::spawn_local(async move {
@@ -36,8 +39,18 @@ impl Game {
         Ok(game)
     }
 
+    pub fn score(&self) -> u32 {
+        self.score
+    }
+
     pub fn tick(&mut self, delta_time: f64) {
         self.display.draw(&self.board);
+
+        let window = web_sys::window().expect("no global `window` exists");
+        let document = window.document().expect("should have a document on window");
+
+        let score_element = document.query_selector("#score").expect("Expected `#score` element").unwrap().dyn_into::<HtmlParagraphElement>().expect("Expected cast into `HtmlParagraphElement` to succeed");
+        score_element.set_inner_text(format!("{}", self.score).as_str());
 
         self.time_since_last_drop += delta_time;
         let drop_interval = 500.0;
@@ -50,6 +63,15 @@ impl Game {
                 self.board.current_piece = next_piece;
             } else {
                 self.board.lock_piece();
+                let lines_cleared = self.board.clear_lines();
+                log(format!("{}", lines_cleared).as_str());
+                self.score += match lines_cleared {
+                    1 => 100,
+                    2 => 300,
+                    3 => 500,
+                    4 => 800,
+                    _ => 0,
+                };
                 let new_piece_type = self.get_next_piece();
                 self.board.current_piece = PieceState::new(new_piece_type, self.cursor_x);
             }
@@ -96,6 +118,14 @@ impl Game {
                 self.board.current_piece = next_piece;
             } else {
                 self.board.lock_piece();
+                let lines_cleared = self.board.clear_lines();
+                self.score += match lines_cleared {
+                    1 => 100,
+                    2 => 300,
+                    3 => 500,
+                    4 => 800,
+                    _ => 0,
+                };
                 let new_piece_type = self.get_next_piece();
                 self.board.current_piece = PieceState::new(new_piece_type, self.cursor_x);
                 break;
