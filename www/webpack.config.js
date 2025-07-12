@@ -13,6 +13,12 @@ module.exports = {
   },
   mode: "development",
   plugins: [
-    new CopyWebpackPlugin(['index.html', 'style.css'])
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'index.html' },
+        { from: 'style.css' },
+        { from: '../pkg', to: 'pkg' }
+      ]
+    })
   ],
 };
