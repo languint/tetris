@@ -1,5 +1,7 @@
 import { Game } from "wasm-tetris";
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function run() {
   const wasmModule = await import("wasm-tetris");
 
@@ -21,6 +23,16 @@ async function run() {
 
     requestAnimationFrame(renderLoop);
   };
+
+  const normalButton = document.querySelector("#normal-button");
+
+  normalButton.addEventListener("click", async (e) => {
+    game.hide_menu();
+    await sleep(500);
+    game.show_game();
+    await sleep(500);
+    game.resume_game();
+  })
 
   addEventListener("keydown", (e) => {
     switch (e.code) {

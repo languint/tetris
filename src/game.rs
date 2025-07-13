@@ -23,6 +23,7 @@ pub struct Game {
     bag: Vec<PieceType>,
     bag_index: usize,
     drop_interval_ms: i32,
+    is_game_running: bool,
 }
 
 #[wasm_bindgen]
@@ -42,6 +43,7 @@ impl Game {
             bag: Vec::new(),
             bag_index: 0,
             drop_interval_ms: 1000,
+            is_game_running: false,
         };
 
         game.new_bag();
@@ -57,6 +59,10 @@ impl Game {
     }
 
     pub fn tick(&mut self, delta_time: f64) {
+        if !self.is_game_running {
+            return;
+        }
+
         let mut ghost_piece = self.board.current_piece.clone();
         while self.board.is_valid_position(&ghost_piece.move_down()) {
             ghost_piece.row += 1;
@@ -113,6 +119,34 @@ impl Game {
         self.display
             .resize(&self.board)
             .unwrap_or_else(|err| log(&format!("Error during resize: {:?}", err)));
+    }
+
+    pub fn is_game_running(&self) -> bool {
+        self.is_game_running
+    }
+
+    pub fn pause_game(&mut self) {
+        self.is_game_running = false;
+    }
+
+    pub fn resume_game(&mut self) {
+        self.is_game_running = true;
+    }
+
+    pub fn hide_game(&self) {
+        display::fade_out_game().expect("Expected `fade_out_game` call to succeed");
+    }
+
+    pub fn show_game(&self) {
+        display::fade_in_game().expect("Expected `fade_in_game` call to succeed");
+    }
+
+    pub fn hide_menu(&self) {
+        display::fade_out_menu().expect("Expected `fade_out_menu` call to succeed");
+    }
+
+    pub fn show_menu(&self) {
+        display::fade_in_menu().expect("Expected `fade_in_menu` call to succeed");
     }
 }
 
@@ -262,3 +296,4 @@ impl Game {
         }
     }
 }
+

@@ -2,7 +2,7 @@ use std::cmp;
 
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, HtmlHtmlElement};
+use web_sys::{CanvasRenderingContext2d, Element, HtmlCanvasElement, HtmlElement, HtmlHtmlElement};
 
 use crate::{
     board::Board,
@@ -391,17 +391,72 @@ pub async fn intro_animation() -> Result<(), JsValue> {
     JsFuture::from(sleep(500)).await?;
     splashscreen.class_list().add_1("hidden")?;
 
-    use wasm_bindgen::JsCast;
-    use web_sys::HtmlElement;
+    fade_in_menu()?;
+    JsFuture::from(sleep(500)).await?;
 
-    let game_container = document
+    Ok(())
+}
+
+pub fn fade_in_menu() -> Result<(), JsValue> {
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+
+    let menu_container = document
+        .query_selector(".menu")
+        .expect("Expected `.menu` element")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap();
+
+    menu_container.class_list().set_value("menu fade-in");
+
+    Ok(())
+}
+
+pub fn fade_out_menu() -> Result<(), JsValue> {
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+
+    let menu_container = document
+        .query_selector(".menu")
+        .expect("Expected `.menu` element")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap();
+
+    menu_container.class_list().set_value("menu fade-out");
+
+    Ok(())
+}
+
+pub fn fade_in_game() -> Result<(), JsValue> {
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+
+    let menu_container = document
         .query_selector(".game-container")
         .expect("Expected `.game-container` element")
         .unwrap()
         .dyn_into::<HtmlElement>()
         .unwrap();
 
-    game_container.class_list().add_1("fade-in")?;
+    menu_container.class_list().set_value("game-container fade-in");
+
+    Ok(())
+}
+
+pub fn fade_out_game() -> Result<(), JsValue> {
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+
+    let menu_container = document
+        .query_selector(".game-container")
+        .expect("Expected `.game-container` element")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap();
+
+    menu_container.class_list().set_value("game-container fade-out");
 
     Ok(())
 }
