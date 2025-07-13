@@ -164,7 +164,7 @@ impl PieceState {
         PieceState {
             piece: Piece::get_piece_data(&piece_type),
             piece_type,
-            row: 0,
+            row: -2,
             col: column,
             rotation: 0,
         }
