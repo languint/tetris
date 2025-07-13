@@ -1,14 +1,9 @@
-import { Game } from "wasm-tetris";
+import init, { Game } from "wasm-tetris";
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function run() {
-  const wasmModule = await import("wasm-tetris");
-
-  if (typeof wasmModule.init === 'function') {
-    await wasmModule.init();
-  }
-
+  await init();
 
   const game = new Game();
 
